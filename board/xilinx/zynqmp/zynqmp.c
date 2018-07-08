@@ -372,13 +372,11 @@ int board_early_init_r(void)
 
 int zynq_board_read_rom_ethaddr(unsigned char *ethaddr)
 {
-#if defined(CONFIG_ZYNQ_GEM_EEPROM_ADDR) && \
-    defined(CONFIG_ZYNQ_GEM_I2C_MAC_OFFSET) && \
-    defined(CONFIG_ZYNQ_EEPROM_BUS)
-	i2c_set_bus_num(CONFIG_ZYNQ_EEPROM_BUS);
+#if defined(CONFIG_MAC_ADDR_IN_I2C_EEPROM)
+	i2c_set_bus_num(CONFIG_MAC_ADDR_I2C_EEPROM_BUS);
 
-	if (eeprom_read(CONFIG_ZYNQ_GEM_EEPROM_ADDR,
-			CONFIG_ZYNQ_GEM_I2C_MAC_OFFSET,
+	if (eeprom_read(CONFIG_MAC_ADDR_I2C_EEPROM_CHIP_ADDR,
+			CONFIG_MAC_ADDR_I2C_EEPROM_DATA_ADDR_START,
 			ethaddr, 6))
 		printf("I2C EEPROM MAC address read failed\n");
 #endif

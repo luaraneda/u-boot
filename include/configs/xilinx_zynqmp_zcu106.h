@@ -36,8 +36,6 @@
 #define CONFIG_PCA953X
 
 #define CONFIG_SYS_I2C_EEPROM_ADDR_LEN	1
-#define CONFIG_ZYNQ_EEPROM_BUS		5
-#define CONFIG_ZYNQ_GEM_EEPROM_ADDR	0x54
 
 #include <configs/xilinx_zynqmp.h>
 
