@@ -272,6 +272,32 @@ config SYS_I2C_EEPROM_ADDR_OVERFLOW
 
 endif
 
+config MAC_ADDR_IN_I2C_EEPROM
+	bool "MAC address in I2C EEPROM"
+	help
+	  Read MAC address(es) from an EEPROM
+	  connected to an I2C bus
+
+if MAC_ADDR_IN_I2C_EEPROM
+
+config MAC_ADDR_I2C_EEPROM_BUS
+	int "I2C bus connected to the EEPROM device"
+	default 0
+
+config MAC_ADDR_I2C_EEPROM_CHIP_ADDR
+	hex "Chip address of the EEPROM device"
+	default 0
+
+config MAC_ADDR_I2C_EEPROM_DATA_ADDR_LEN
+	int "Length in bytes of EEPROM data addresses"
+	default 1
+
+config MAC_ADDR_I2C_EEPROM_DATA_ADDR_START
+	hex "Start address of MAC data in EEPROM"
+	default 0
+
+endif
+
 config GDSYS_RXAUI_CTRL
 	bool "Enable gdsys RXAUI control driver"
 	depends on MISC
