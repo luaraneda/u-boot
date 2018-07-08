@@ -8,6 +8,7 @@
 #include <dm/uclass.h>
 #include <fdtdec.h>
 #include <fpga.h>
+#include <i2c.h>
 #include <mmc.h>
 #include <watchdog.h>
 #include <wdt.h>
@@ -76,10 +77,25 @@ int board_late_init(void)
 int zynq_board_read_rom_ethaddr(unsigned char *ethaddr)
 {
 #if defined(CONFIG_MAC_ADDR_IN_I2C_EEPROM)
-	if (eeprom_read(CONFIG_MAC_ADDR_I2C_EEPROM_CHIP_ADDR,
-			CONFIG_MAC_ADDR_I2C_EEPROM_DATA_ADDR_START,
-			ethaddr, 6))
-		printf("I2C EEPROM MAC address read failed\n");
+	int ret;
+	struct udevice *bus, *dev;
+
+	ret = uclass_get_device_by_seq(UCLASS_I2C,
+				       CONFIG_MAC_ADDR_I2C_EEPROM_BUS,
+				       &bus);
+	if (!ret)
+		ret = i2c_get_chip(bus,
+				   CONFIG_MAC_ADDR_I2C_EEPROM_CHIP_ADDR,
+				   1, &dev);
+	if (!ret)
+		ret = i2c_set_chip_offset_len(dev,
+					      CONFIG_MAC_ADDR_I2C_EEPROM_DATA_ADDR_LEN);
+	if (!ret)
+		ret = dm_i2c_read(dev,
+				  CONFIG_MAC_ADDR_I2C_EEPROM_DATA_ADDR_START,
+				  ethaddr, 6);
+	if (ret)
+		printf("I2C EEPROM MAC address read failed (%i)\n", ret);
 #endif
 
 	return 0;
