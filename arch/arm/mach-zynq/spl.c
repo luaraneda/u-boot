@@ -4,6 +4,8 @@
  */
 #include <common.h>
 #include <debug_uart.h>
+#include <fpga.h>
+#include <memalign.h>
 #include <spl.h>
 
 #include <asm/io.h>
@@ -90,6 +92,43 @@ int board_fit_config_name_match(const char *name)
 	/* Just empty function now - can't decide what to choose */
 	debug("%s: %s\n", __func__, name);
 
+	return 0;
+}
+#endif
+
+#ifdef CONFIG_SPL_FPGA_SUPPORT
+int spl_load_fpga_image(struct spl_load_info *info, size_t length,
+			int nr_sectors, int sector_offset)
+{
+	char *data_buf;
+	int ret;
+
+	data_buf = malloc_cache_aligned(nr_sectors);
+	if (!data_buf) {
+		debug("%s: Cannot reserve memory\n", __func__);
+		return -ENOMEM;
+	}
+
+	if (info->read(info, sector_offset, nr_sectors,
+		       data_buf) != nr_sectors) {
+		debug("%s: Cannot read the FPGA image\n", __func__);
+		free(data_buf);
+		return -EIO;
+	}
+
+	memmove(data_buf, data_buf + (nr_sectors - length), length);
+
+	debug("%s: FPGA image loaded to 0x%p (%zu bytes)\n",
+	      __func__, data_buf, length);
+
+	ret = fpga_load(0, data_buf, length, BIT_FULL);
+	if (ret) {
+		debug("%s: Cannot load the image to the FPGA\n", __func__);
+		free(data_buf);
+		return ret;
+	}
+
+	free(data_buf);
 	return 0;
 }
 #endif
