@@ -272,6 +272,23 @@ config SYS_I2C_EEPROM_ADDR_OVERFLOW
 
 endif
 
+config MAC_ADDR_IN_SPI_FLASH
+	bool "MAC address in SPI flash"
+	help
+	  Read MAC address from an SPI flash memory
+
+if MAC_ADDR_IN_SPI_FLASH
+
+config MAC_ADDR_SPI_FLASH_READ_CMD
+	hex "Read command for the SPI flash memory"
+	default 0
+
+config MAC_ADDR_SPI_FLASH_DATA_OFFSET
+	hex "Offset of MAC data in SPI flash memory"
+	default 0
+
+endif
+
 config GDSYS_RXAUI_CTRL
 	bool "Enable gdsys RXAUI control driver"
 	depends on MISC
