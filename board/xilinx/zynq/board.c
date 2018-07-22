@@ -6,9 +6,12 @@
 
 #include <common.h>
 #include <dm/uclass.h>
+#include <dm/device.h>
+#include <dm/device-internal.h>
 #include <fdtdec.h>
 #include <fpga.h>
 #include <mmc.h>
+#include <spi_flash.h>
 #include <watchdog.h>
 #include <wdt.h>
 #include <zynqpl.h>
@@ -87,6 +90,31 @@ int zynq_board_read_rom_ethaddr(unsigned char *ethaddr)
 		printf("I2C EEPROM MAC address read failed\n");
 #endif
 
+#if defined(CONFIG_MAC_ADDR_IN_SPI_FLASH)
+	struct spi_flash *flash;
+	struct udevice *dev;
+	int ret;
+
+	ret = spi_flash_probe_bus_cs(CONFIG_SF_DEFAULT_BUS,
+				     CONFIG_SF_DEFAULT_CS,
+				     0, 0, &dev);
+	if (ret) {
+		printf("SPI(bus:%u cs:%u) probe failed\n",
+		       CONFIG_SF_DEFAULT_BUS,
+		       CONFIG_SF_DEFAULT_CS);
+		return 0;
+	}
+
+	flash = dev_get_uclass_priv(dev);
+	flash->read_cmd = CONFIG_MAC_ADDR_SPI_FLASH_READ_CMD;
+
+	if (spi_flash_read_dm(dev,
+			      CONFIG_MAC_ADDR_SPI_FLASH_DATA_OFFSET,
+			      6, ethaddr))
+		printf("SPI MAC address read failed\n");
+
+	device_remove(dev, DM_REMOVE_NORMAL);
+#endif
 	return 0;
 }
 
